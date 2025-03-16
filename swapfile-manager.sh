@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2086
 
 LOG_FILE="/var/log/swapfile-manager.log"
 
@@ -94,7 +95,8 @@ function adicionar_fstab() {
     log_action "Adicionando $swapfile ao /etc/fstab..."
 
     # Fazer backup do /etc/fstab antes de modificar, com data e hora
-    local backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
+    local backup_file
+    backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
     sudo cp /etc/fstab $backup_file
     log_action "Backup do /etc/fstab criado em $backup_file."
 
@@ -114,7 +116,8 @@ function remover_fstab() {
     log_action "Removendo $swapfile do /etc/fstab..."
 
     # Fazer backup do /etc/fstab antes de modificar, com data e hora
-    local backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
+    local backup_file
+    backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
     sudo cp /etc/fstab $backup_file
     log_action "Backup do /etc/fstab criado em $backup_file."
 
