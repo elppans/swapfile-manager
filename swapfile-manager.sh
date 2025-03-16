@@ -2,6 +2,14 @@
 
 LOG_FILE="/var/log/swapfile-manager.log"
 
+# Função para verificar se o script está sendo executado como root
+function verificar_permissao() {
+    if [[ $EUID -ne 0 ]]; then
+        echo "Erro: Este script precisa ser executado como root (usuário com permissões de superusuário)."
+        exit 1
+    fi
+}
+
 # Função para exibir mensagens de ajuda
 function show_help() {
     echo "Uso: $0 [opção] [tamanho]"
@@ -114,6 +122,9 @@ function remover_fstab() {
     sudo sed -i "/$swapfile/d" /etc/fstab
     log_action "Configuração do swapfile removida do /etc/fstab!"
 }
+
+# Verificar se o script está sendo executado como root
+verificar_permissao
 
 # Processar as opções fornecidas
 if [[ $# -lt 1 ]]; then
