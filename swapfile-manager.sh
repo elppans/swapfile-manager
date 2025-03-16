@@ -1,15 +1,7 @@
 #!/bin/bash
-# shellcheck disable=SC2086
+# shellcheck disable=SC2086,SC2155
 
 LOG_FILE="/var/log/swapfile-manager.log"
-
-# Função para verificar se o script está sendo executado como root
-function verificar_permissao() {
-    if [[ $EUID -ne 0 ]]; then
-        echo "Erro: Este script precisa ser executado como root (usuário com permissões de superusuário)."
-        exit 1
-    fi
-}
 
 # Função para exibir mensagens de ajuda
 function show_help() {
@@ -25,6 +17,14 @@ function show_help() {
 # Função para registrar ações no log
 function log_action() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | sudo tee -a $LOG_FILE
+}
+
+# Função para verificar se o script está sendo executado como root
+function verificar_permissao() {
+    if [[ $EUID -ne 0 ]]; then
+        echo "Erro: Este script precisa ser executado como root (usuário com permissões de superusuário)."
+        exit 1
+    fi
 }
 
 # Função para criar o swapfile
@@ -95,8 +95,7 @@ function adicionar_fstab() {
     log_action "Adicionando $swapfile ao /etc/fstab..."
 
     # Fazer backup do /etc/fstab antes de modificar, com data e hora
-    local backup_file
-    backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
+    local backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
     sudo cp /etc/fstab $backup_file
     log_action "Backup do /etc/fstab criado em $backup_file."
 
@@ -116,8 +115,7 @@ function remover_fstab() {
     log_action "Removendo $swapfile do /etc/fstab..."
 
     # Fazer backup do /etc/fstab antes de modificar, com data e hora
-    local backup_file
-    backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
+    local backup_file="/etc/fstab.bak_$(date '+%Y-%m-%d_%H-%M-%S')"
     sudo cp /etc/fstab $backup_file
     log_action "Backup do /etc/fstab criado em $backup_file."
 
@@ -126,15 +124,16 @@ function remover_fstab() {
     log_action "Configuração do swapfile removida do /etc/fstab!"
 }
 
+# Verificar se o script foi executado com o parâmetro de ajuda
+if [[ $# -eq 0 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+    show_help
+    exit 0
+fi
+
 # Verificar se o script está sendo executado como root
 verificar_permissao
 
 # Processar as opções fornecidas
-if [[ $# -lt 1 ]]; then
-    show_help
-    exit 1
-fi
-
 case $1 in
     -c|--criar)
         if [[ -z $2 ]]; then
@@ -157,9 +156,6 @@ case $1 in
         ;;
     -r|--remover-fstab)
         remover_fstab
-        ;;
-    -h|--help)
-        show_help
         ;;
     *)
         echo "Opção inválida!"
